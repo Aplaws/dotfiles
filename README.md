@@ -1,13 +1,57 @@
-# Alexander's Dotfiles
+# Aplaws's Dotfiles
 
 Mein persönliches Setup für:
 
-- Neovim
-- tmux
-- dev-Skript
-- bashrc / Aliase
+* Neovim
+* tmux
+* dev-Skript
+* bashrc / Aliase
+
+## Inhalt
+
+```text
+dotfiles/
+├── bashrc
+├── bin/
+│   └── dev
+├── nvim/
+│   └── init.lua
+├── tmux.conf
+├── install.sh
+└── README.md
+```
 
 ## Wiederherstellen
+
+Auf einem neuen Rechner:
+
+```bash
+mkdir -p ~/workspace
+cd ~/workspace
+
+git clone https://github.com/Aplaws/dotfiles.git
+cd dotfiles
+
+./install.sh
+```
+
+Danach Terminal neu starten oder ausführen:
+
+```bash
+source ~/.bashrc
+```
+
+## Neovim Plugins installieren
+
+Nach dem ersten Start von Neovim:
+
+```vim
+:Lazy sync
+```
+
+## Manuell wiederherstellen
+
+Falls das Install-Skript nicht benutzt werden soll:
 
 ```bash
 mkdir -p ~/.config/nvim
@@ -20,41 +64,23 @@ cp bashrc ~/.bashrc
 
 chmod +x ~/.local/bin/dev
 source ~/.bashrc
+```
 
+## Änderungen speichern
 
----
-
-## 5. Install-Skript erstellen
-
-Das macht später auf einem neuen Rechner alles einfacher:
+Wenn sich die echten Config-Dateien geändert haben:
 
 ```bash
-cat > install.sh <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
+cd ~/workspace/dotfiles
 
-echo "Erstelle Ordner..."
-mkdir -p ~/.config/nvim
-mkdir -p ~/.local/bin
+cp -r ~/.config/nvim/* ./nvim/
+cp ~/.tmux.conf ./tmux.conf
+cp ~/.local/bin/dev ./bin/dev
+cp ~/.bashrc ./bashrc
 
-echo "Backup alter Dateien..."
-[ -f ~/.tmux.conf ] && cp ~/.tmux.conf ~/.tmux.conf.backup
-[ -f ~/.bashrc ] && cp ~/.bashrc ~/.bashrc.backup
-[ -d ~/.config/nvim ] && cp -r ~/.config/nvim ~/.config/nvim.backup
+git status
+git add .
+git commit -m "Update dotfiles"
+git push
+```
 
-echo "Kopiere Neovim Config..."
-cp -r nvim/* ~/.config/nvim/
-
-echo "Kopiere tmux Config..."
-cp tmux.conf ~/.tmux.conf
-
-echo "Kopiere dev Skript..."
-cp bin/dev ~/.local/bin/dev
-chmod +x ~/.local/bin/dev
-
-echo "Kopiere bashrc..."
-cp bashrc ~/.bashrc
-
-echo "Fertig."
-echo "Starte dein Terminal neu oder führe aus:"
-echo "source ~/.bashrc"
