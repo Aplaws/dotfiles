@@ -119,3 +119,7 @@ fi
 # Created by `pipx` on 2026-04-19 15:25:02
 export PATH="$PATH:/home/aplaws/.local/bin"
 export PATH="$HOME/.npm-global/bin:$PATH"
+
+# Generated for envman. Do not edit.
+[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
+export PATH=$PATH:$HOME/.local/opt/go/bin

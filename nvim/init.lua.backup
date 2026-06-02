@@ -1,0 +1,108 @@
+-- ========================
+-- lazy bootstrap
+-- ========================
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- ========================
+-- basic settings
+-- ========================
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+vim.opt.scrolloff = 10 
+vim.g.mapleader = " "
+
+-- ========================
+-- plugins
+-- ========================
+require("lazy").setup({
+  { "neovim/nvim-lspconfig" },
+
+  { 
+    "hrsh7th/nvim-cmp",
+    dependencies = { "hrsh7th/cmp-nvim-lsp" }
+  },
+
+  { "L3MON4D3/LuaSnip" },
+
+  { "stevearc/conform.nvim" },
+
+  { "mfussenegger/nvim-lint" },
+})
+
+-- ========================
+-- LSP
+-- ========================
+vim.lsp.enable("pyright")
+vim.lsp.enable("clangd")
+
+-- ========================
+-- Autocomplete
+-- ========================
+local ok_cmp, cmp = pcall(require, "cmp")
+if ok_cmp then
+  cmp.setup({
+    mapping = cmp.mapping.preset.insert({
+      ["<C-Space>"] = cmp.mapping.complete(),
+      ["<CR>"] = cmp.mapping.confirm({ select = true }),
+      ["<Tab>"] = cmp.mapping.select_next_item(),
+      ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+    }),
+    sources = {
+      { name = "nvim_lsp" },
+    },
+  })
+end
+
+-- ========================
+-- Format
+-- ========================
+local ok_conform, conform = pcall(require, "conform")
+if ok_conform then
+  conform.setup({
+    format_on_save = {
+      timeout_ms = 500,
+      lsp_fallback = true,
+    },
+    formatters_by_ft = {
+      python = { "black" },
+    },
+  })
+end
+
+-- ========================
+-- Lint
+-- ========================
+local ok_lint, lint = pcall(require, "lint")
+if ok_lint then
+  lint.linters_by_ft = {
+    python = { "flake8" },
+  }
+
+  vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+    callback = function()
+      lint.try_lint()
+    end,
+  })
+end
+
+-- ========================
+-- keymaps
+-- ========================
+vim.keymap.set("n", "<leader>w", ":w<CR>")
+vim.keymap.set("n", "<leader>q", ":q<CR>")
+vim.keymap.set("n", "<leader>f", function()
+  require("conform").format()
+end)

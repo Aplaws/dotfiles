@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROJECT_DIR="${1:-$PWD}"
+SESSION_NAME="${2:-$(basename "$PROJECT_DIR")}"
+
+# Wenn die Session schon existiert: einfach wieder rein
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+  tmux attach -t "$SESSION_NAME"
+  exit 0
+fi
+
+# Fenster 1: nvim
+tmux new-session -d -s "$SESSION_NAME" -c "$PROJECT_DIR" -n nvim
+tmux send-keys -t "$SESSION_NAME":1 "nvim ." C-m
+
+# Fenster 2: run/test
+tmux new-window -t "$SESSION_NAME":2 -c "$PROJECT_DIR" -n run
+
+# Fenster 3: git/shell
+tmux new-window -t "$SESSION_NAME":3 -c "$PROJECT_DIR" -n git
+tmux send-keys -t "$SESSION_NAME":3 "git status" C-m
+
+# Zurück zu nvim
+tmux select-window -t "$SESSION_NAME":1
+tmux attach -t "$SESSION_NAME"
